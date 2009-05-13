@@ -264,14 +264,14 @@ not the way to do it.
   end
 end
 
-Shoes.app :width => 800, :height => 600, :resizable => false do
+Shoes.app :width => 800, :height => 600 do
   @board = Game::Thud::Board.new
 
   @selected = nil # no selected piece at first
   @selected_piece = nil
-  animate(24) do |i| # animates selected piece
+  animate(10) do |i| # animates selected piece
     unless @selected.nil?
-      @selected.displace(0, (Math.sin(i) * 3).to_i - 3)
+      @selected.displace(0, 1 - (Math.sin(i) * 3).to_i.abs)
     end
   end
 
