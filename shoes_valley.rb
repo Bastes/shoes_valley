@@ -23,8 +23,11 @@ module Piece
     @x.nil?
   end
 
-  def to_s
-    "\#<#{self.class}:#{__id__} @board: #{@board}, @x: #{x}, @y: #{y}>"
+  def == other
+    if other == self.class || other.to_sym == :dwarf
+      return true
+    end
+		false
   end
 end
 
@@ -37,14 +40,6 @@ class Dwarf
       raise ArgumentError.new "Only move on rows, columns or diagonals."
     end
     # FIXME
-  end
-
-  def == other
-    if other == self.class
-      return true
-    elsif other.to_sym == :dwarf
-      return true
-    end
   end
 
 	def type
@@ -133,25 +128,33 @@ end
 Shoes.app :width => 800, :height => 600, :resizable => false do
 	@board = Board.new
 
-	flow do
-		stack :width => 600 do # here goes the board
-			nostroke
-			boardsize = [width, height].sort.first
-			cellsize = boardsize.to_f / 15
-			image "./board.png", :top => 0, :left => 0,
-				    :width => boardsize, :height => boardsize
-			@board.each do |piece|
-				unless piece.dead?
-					image "./#{piece.type}.png",
-								:top => (piece.y * cellsize).to_i,
-								:left => (piece.x * cellsize).to_i,
-								:width => cellsize.to_i, :height => cellsize.to_i
-				end
+	stack :width => 600 do # here goes the board
+		nostroke
+		@boardsize = [width, height].sort.first
+		@cellsize = @boardsize.to_f / 15
+		image "./board.png", :top => 0, :left => 0,
+					:width => @boardsize, :height => @boardsize
+		@board.each do |piece|
+			unless piece.dead?
+				image "./#{piece.type}.png",
+							:top => (piece.y * @cellsize).to_i,
+							:left => (piece.x * @cellsize).to_i,
+							:width => @cellsize.to_i, :height => @cellsize.to_i
 			end
 		end
+	end
 
-		stack :width => -600 do # there goes outer controls
+	stack :width => -600 do
+		flow do # there goes outer controls
 			button("Pass")
+		end
+		flow do # a place for the dead
+			@board.each do |piece|
+				if piece.dead?
+					image "./#{piece.type}.png",
+								:width => @cellsize.to_i, :height => @cellsize.to_i
+				end
+			end
 		end
 	end
 end
