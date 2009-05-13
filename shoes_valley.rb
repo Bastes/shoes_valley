@@ -35,11 +35,13 @@ class Dwarf
   include Piece
 
   def move x, y
+=begin
     raise ArgumentError.new "Already on #{x}, #{y}." if [@x, @y] == [x, y]
     unless @x = 0 or @y = 0 or [-1, 1].include? (@x - x) / (@y - y)
       raise ArgumentError.new "Only move on rows, columns or diagonals."
     end
-    # FIXME
+=end
+    put x, y # FIXME
   end
 
 	def type
@@ -51,7 +53,7 @@ class Troll
   include Piece
 
   def move x, y
-    # FIXME
+    put x, y # FIXME
   end
 
 	def type
@@ -128,18 +130,65 @@ end
 Shoes.app :width => 800, :height => 600, :resizable => false do
 	@board = Board.new
 
+	@selected = nil # no selected piece at first
+	@selected_piece = nil
+	animate(24) do |i| # animates selected piece
+		unless @selected.nil?
+			@selected.displace(0, (Math.sin(i) * 3).to_i - 3)
+		end
+	end
+
 	stack :width => 600 do # here goes the board
-		nostroke
 		@boardsize = [width, height].sort.first
-		@cellsize = @boardsize.to_f / 15
-		image "./board.png", :top => 0, :left => 0,
-					:width => @boardsize, :height => @boardsize
+		@cellgap = @boardsize.to_f / 15
+		@cellsize = @cellgap.to_i
+
+		board_image = image "./board.png", :top => 0, :left => 0,
+					              :width => @boardsize, :height => @boardsize
+
+		# clickable cells (to drop pieces)
+		fill rgb(0, 0, 0, 0)
+		15.times do |y|
+			15.times do |x|
+				if @board.cell? x, y
+					zone = rect((@cellgap * x).to_i, (@cellgap * y).to_i,
+						   @cellsize, @cellsize)
+					zone.click do
+						debug "clickedi at #{x}, #{y}"
+						unless @selected.nil?
+							begin
+								@selected_piece.move x, y
+								@selected.move((@cellgap * x).to_i, (@cellgap * y).to_i)
+								@selected.displace 0, 0
+								@selected = @selected_piece = nil
+							rescue
+								warn "move incomplete"
+							end
+						end
+					end
+				end
+			end
+		end
+
 		@board.each do |piece|
 			unless piece.dead?
-				image "./#{piece.type}.png",
-							:top => (piece.y * @cellsize).to_i,
-							:left => (piece.x * @cellsize).to_i,
-							:width => @cellsize.to_i, :height => @cellsize.to_i
+				piece_image = image "./#{piece.type}.png",
+							              :top => (piece.y * @cellgap).to_i,
+														:left => (piece.x * @cellgap).to_i,
+														:width => @cellsize, :height => @cellsize
+
+				piece_image.click do # selection of a piece
+				  debug "clicked the #{piece.type} at #{piece.x}, #{piece.y}"
+					if @selected.equal? piece_image
+						@selected = nil
+						@selected_piece = nil
+					  piece_image.displace(0, 0)
+					else
+					  @selected.displace(0, 0) unless @selected.nil?
+						@selected = piece_image
+						@selected_piece = piece
+					end
+				end
 			end
 		end
 	end
@@ -152,7 +201,7 @@ Shoes.app :width => 800, :height => 600, :resizable => false do
 			@board.each do |piece|
 				if piece.dead?
 					image "./#{piece.type}.png",
-								:width => @cellsize.to_i, :height => @cellsize.to_i
+								:width => @cellsize, :height => @cellsize
 				end
 			end
 		end
