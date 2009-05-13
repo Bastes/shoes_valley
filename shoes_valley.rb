@@ -137,20 +137,15 @@ Shoes.app :width => 800, :height => 600, :resizable => false do
 		stack :width => 600 do # here goes the board
 			nostroke
 			boardsize = [width, height].sort.first
-			cellsize = boardsize / 15
-			15.times do |y|
-				15.times do |x|
-					if @board.cell? x, y
-						fill (x + y) % 2 == 1 ? black : white
-						rect cellsize * x, cellsize * y, cellsize, cellsize
-					end
-				end
-			end
+			cellsize = boardsize.to_f / 15
+			image "./board.png", :top => 0, :left => 0,
+				    :width => boardsize, :height => boardsize
 			@board.each do |piece|
 				unless piece.dead?
 					image "./#{piece.type}.png",
-								:top => piece.y * cellsize, :left => piece.x * cellsize,
-								:width => cellsize, :height => cellsize
+								:top => (piece.y * cellsize).to_i,
+								:left => (piece.x * cellsize).to_i,
+								:width => cellsize.to_i, :height => cellsize.to_i
 				end
 			end
 		end
