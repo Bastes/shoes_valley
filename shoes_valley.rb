@@ -46,6 +46,10 @@ class Dwarf
       return true
     end
   end
+
+	def type
+		:dwarf
+	end
 end
 
 class Troll
@@ -54,10 +58,18 @@ class Troll
   def move x, y
     # FIXME
   end
+
+	def type
+		:troll
+	end
 end
 
 class Stone
   include Piece
+
+	def type
+		:stone
+	end
 end
 
 class Board
@@ -104,7 +116,7 @@ class Board
   end
 
   def each &block
-    @cells.each block
+    @pieces.each &block
   end
 
   def free? x, y
@@ -118,8 +130,33 @@ class Board
   end
 end
 
-=begin
-Shoes.app do
-  # FIXME
+Shoes.app :width => 800, :height => 600, :resizable => false do
+	@board = Board.new
+
+	flow do
+		stack :width => 600 do # here goes the board
+			nostroke
+			boardsize = [width, height].sort.first
+			cellsize = boardsize / 15
+			15.times do |y|
+				15.times do |x|
+					if @board.cell? x, y
+						fill (x + y) % 2 == 1 ? black : white
+						rect cellsize * x, cellsize * y, cellsize, cellsize
+					end
+				end
+			end
+			@board.each do |piece|
+				unless piece.dead?
+					image "./#{piece.type}.png",
+								:top => piece.y * cellsize, :left => piece.x * cellsize,
+								:width => cellsize, :height => cellsize
+				end
+			end
+		end
+
+		stack :width => -600 do # there goes outer controls
+			button("Pass")
+		end
+	end
 end
-=end
