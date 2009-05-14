@@ -2,6 +2,66 @@ $LOAD_PATH << './lib'
 
 require 'board'
 
+module BoardView
+  attr_accessor :board
+  attr_reader :width, :height
+
+  def width= value
+    clear_sizes! if @width.nil? or @height.nil? or value < [@width, @height].sort.first
+    @width = value
+  end
+
+  def height= value
+    clear_sizes! if @width.nil? or @height.nil? or value < [@width, @height].sort.first
+    @height = value
+  end
+
+  def redraw
+    self.image "./board.png", :top => 0, :left => 0, :width => board_size, :height => board_size
+
+    fill rgb(0, 0, 0, 0)
+    15.times do |y|
+      15.times do |x|
+        if @board.cell? x, y
+          zone = rect((cell_gap * x).to_i, (cell_gap * y).to_i, cell_size, cell_size)
+          # FIXME
+        end
+      end
+    end
+  end
+
+  private
+
+  def board_size
+    @board_size ||= [@width, @height].sort.first
+  end
+
+  def cell_gap
+    @cell_gap ||= board_size.to_f / 15
+  end
+
+  def cell_size
+    @cell_size ||= cell_gap.to_i
+  end
+
+  def clear_sizes!
+    @board_size = nil
+    @cell_gap = nil
+    @cell_size = nil
+  end
+
+end
+
+Shoes.app :width => 600, :height => 600 do
+  @my_stack = stack(:width => 600)
+  @my_stack.extend BoardView
+  @my_stack.board = Game::Thud::Board.new
+  @my_stack.width = width
+  @my_stack.height = height
+  @my_stack.redraw
+end
+
+=begin
 Shoes.app :width => 800, :height => 600 do
   @board = Game::Thud::Board.new
 
@@ -14,26 +74,26 @@ Shoes.app :width => 800, :height => 600 do
   end
 
   stack :width => 600 do # here goes the board
-    @boardsize = [width, height].sort.first
-    @cellgap = @boardsize.to_f / 15
-    @cellsize = @cellgap.to_i
+    @board_size = [width, height].sort.first
+    @cell_gap = @board_size.to_f / 15
+    @cell_size = @cell_gap.to_i
 
     board_image = image "./board.png", :top => 0, :left => 0,
-                        :width => @boardsize, :height => @boardsize
+                        :width => @board_size, :height => @board_size
 
     # clickable cells (to drop pieces)
     fill rgb(0, 0, 0, 0)
     15.times do |y|
       15.times do |x|
         if @board.cell? x, y
-          zone = rect((@cellgap * x).to_i, (@cellgap * y).to_i,
-               @cellsize, @cellsize)
+          zone = rect((@cell_gap * x).to_i, (@cell_gap * y).to_i,
+               @cell_size, @cell_size)
           zone.click do
             debug "clickedi at #{x}, #{y}"
             unless @selected.nil?
               begin
                 @selected_piece.move x, y
-                @selected.move((@cellgap * x).to_i, (@cellgap * y).to_i)
+                @selected.move((@cell_gap * x).to_i, (@cell_gap * y).to_i)
                 @selected.displace 0, 0
                 @selected = @selected_piece = nil
               rescue
@@ -48,9 +108,9 @@ Shoes.app :width => 800, :height => 600 do
     @board.each do |piece|
       unless piece.dead?
         piece_image = image "./#{piece.type}.png",
-                            :top => (piece.y * @cellgap).to_i,
-                            :left => (piece.x * @cellgap).to_i,
-                            :width => @cellsize, :height => @cellsize
+                            :top => (piece.y * @cell_gap).to_i,
+                            :left => (piece.x * @cell_gap).to_i,
+                            :width => @cell_size, :height => @cell_size
 
         piece_image.click do # selection of a piece
           debug "clicked the #{piece.type} at #{piece.x}, #{piece.y}"
@@ -76,9 +136,10 @@ Shoes.app :width => 800, :height => 600 do
       @board.each do |piece|
         if piece.dead?
           image "./#{piece.type}.png",
-                :width => @cellsize, :height => @cellsize
+                :width => @cell_size, :height => @cell_size
         end
       end
     end
   end
 end
+=end
