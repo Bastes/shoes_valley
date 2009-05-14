@@ -7,30 +7,49 @@ module BoardView
   attr_reader :width, :height
 
   def width= value
-    clear_sizes! if @width.nil? or @height.nil? or value < [@width, @height].sort.first
+    if @width.nil? or @height.nil? or value < [@width, @height].sort.first
+      clear_sizes!
+    end
     @width = value
   end
 
   def height= value
-    clear_sizes! if @width.nil? or @height.nil? or value < [@width, @height].sort.first
+    if @width.nil? or @height.nil? or value < [@width, @height].sort.first
+      clear_sizes!
+    end
     @height = value
   end
 
   def redraw
-    self.image "./board.png", :top => 0, :left => 0, :width => board_size, :height => board_size
+    self.image "./board.png", :top => 0, :left => 0,
+               :width => board_size, :height => board_size
 
     fill rgb(0, 0, 0, 0)
     15.times do |y|
       15.times do |x|
         if @board.cell? x, y
-          zone = rect((cell_gap * x).to_i, (cell_gap * y).to_i, cell_size, cell_size)
-          # FIXME
+          zone = rect((cell_gap * x).to_i, (cell_gap * y).to_i,
+                      cell_size, cell_size)
+          # FIXME : controller method
         end
+      end
+    end
+
+    @board.each do |piece|
+      unless piece.dead?
+        piece_image piece
       end
     end
   end
 
   private
+
+  def piece_image piece
+    image "./#{piece.type}.png",
+          :top => (piece.y * cell_gap).to_i,
+          :left => (piece.x * cell_gap).to_i,
+          :width => cell_size, :height => cell_size
+  end
 
   def board_size
     @board_size ||= [@width, @height].sort.first
@@ -49,7 +68,6 @@ module BoardView
     @cell_gap = nil
     @cell_size = nil
   end
-
 end
 
 Shoes.app :width => 600, :height => 600 do
