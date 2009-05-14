@@ -211,13 +211,13 @@ not the way to do it.
       end
 
       # Putting something on the board.
-      # Putting "nil" on an occupied cell takes the occupant out.
-      # Putting anything on an occupied cell results in an ArgumentError.
-      # Putting a Piece class (or matching symbol) on an empty cell makes a new
-      # instance and put it on the cell.
-      # Putting an existing instance of a Piece class belonging to this board on
-      # an empty cell moves this piece on this cell.
-      # Putting anything else results in an ArgumentError.
+      # "nil" on an occupied cell takes the occupant out.
+      # Anything on an occupied cell results in an ArgumentError.
+      # A Piece class (or matching symbol) on an empty cell makes a new instance
+      # and put it on the cell.
+      # Existing instance of a Piece class belonging to this board on an empty
+      # cell moves this piece on this cell.
+      # Anything else results in an ArgumentError.
       # x, y:: coordinates of the cell
       # something:: what is put
       def []= x, y, something
