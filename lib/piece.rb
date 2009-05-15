@@ -20,27 +20,23 @@ module Game
         unless @board.free? x, y
           raise ArgumentError.new("Cell #{x}, #{y} occupied.")
         end
+        fromx, fromy = [@x, @y]
         @x, @y = [x, y]
+        @board.piece_event self, fromx, fromy
         self
       end
 
       # takes the piece out of the board as a prisonner
       def kill
+        fromx, fromy = [@x, @y]
         @x = @y = nil
+        @board.piece_event self, fromx, fromy
         self
       end
 
       # is the piece out of the board ?
       def dead?
         @x.nil?
-      end
-
-      # can be compared to any of its own class, its own class or its symbol
-      def == other
-        if other == self.class || other.to_sym == :dwarf
-          return true
-        end
-        false
       end
     end
   end

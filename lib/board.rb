@@ -41,7 +41,8 @@ module Game
     class Board
       # See default setup on general class comments.
       def initialize
-        @pieces =  []
+        @listeners = []
+        @pieces = []
         15.times do |x|
           15.times do |y|
             xr = [x, 14 - x].sort.first
@@ -113,6 +114,31 @@ module Game
         xr = [x, 14 - x].sort.first
         yr = [y, 14 - y].sort.first
         (0..7).include? xr and (0..7).include? yr and xr + yr > 4
+      end
+
+      # Add a board listener.
+      # listener:: board listener to add
+      def listen listener
+        unless listener.respond_to? :board_event
+          raise ArgumentError.new "#{listener} is not a board listener."
+        end
+        @listeners << listener unless @listeners.include? listener
+      end
+
+      # Remove a board listener.
+      # listener:: board listener to remove
+      def deafen listener
+        @listeners.delete listener
+      end
+
+      # Triggered by pieces when they move.
+      #
+      # piece:: an event is happening to a piece
+      # x, y:: former position of the piece
+      def piece_event piece, fromx = nil, fromy = nil
+        @listeners.each do |listener|
+          listener.board_event piece, fromx, fromy
+        end
       end
     end
   end

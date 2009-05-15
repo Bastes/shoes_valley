@@ -3,8 +3,12 @@ $LOAD_PATH << './lib'
 require 'board'
 
 module BoardView
-  attr_accessor :board
-  attr_reader :width, :height
+  attr_reader :width, :height, :board
+
+  def board= value
+    @board = value
+    @board.listen self
+  end
 
   def width= value
     if @width.nil? or @height.nil? or value < [@width, @height].sort.first
@@ -61,22 +65,45 @@ module BoardView
       this_piece_image = find_piece_image(piece)
       this_piece_image.displace(0, 0)
       piece.move(x, y)
-      this_piece_image.move((cell_gap * x).to_i, (cell_gap * y).to_i)
+    end
+  end
+
+  def board_event piece, fromx, fromy
+    if piece.dead?
+      find_piece_image(piece).remove
+    else
+      if fromx.nil?
+        piece_image piece
+      else
+        x = (cell_gap * piece.x).to_i
+        y = (cell_gap * piece.y).to_i
+        find_piece_image(fromx, fromy).move(x, y)
+      end
     end
   end
 
   private
   
-  def piece_image piece
-    image "./#{piece.type}.png",
-          :top => (piece.y * cell_gap).to_i,
-          :left => (piece.x * cell_gap).to_i,
+  def piece_image *args
+    if args.length == 1
+      type, x, y = [args.first.type, args.first.x, args.first.y]
+    else
+      type, x, y = args
+    end
+    image "./#{type}.png",
+          :top => (y * cell_gap).to_i,
+          :left => (x * cell_gap).to_i,
           :width => cell_size, :height => cell_size
   end
 
-  def find_piece_image piece
-    x = (cell_gap * piece.x).to_i
-    y = (cell_gap * piece.y).to_i
+  def find_piece_image *args
+    if args.length == 1
+      x = (cell_gap * args.first.x).to_i
+      y = (cell_gap * args.first.y).to_i
+    else
+      x = (cell_gap * args[0]).to_i
+      y = (cell_gap * args[1]).to_i
+    end
     @pieces.detect do |piece_image|
       piece_image.left == x and piece_image.top == y 
     end
