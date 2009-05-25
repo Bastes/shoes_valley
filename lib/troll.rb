@@ -32,6 +32,8 @@ module Game
 
       # If the move is not legit, an exception is raised.
       def move x, y
+        super
+        @board.turn = :dwarf
         put x, y # FIXME
       end
 

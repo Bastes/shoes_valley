@@ -39,10 +39,14 @@ require 'stone'
 module Game
   module Thud
     class Board
+      attr_accessor :turn
+
       # See default setup on general class comments.
       def initialize
         @listeners = []
         @pieces = []
+        @turn = :dwarf
+
         15.times do |x|
           15.times do |y|
             xr = [x, 14 - x].sort.first

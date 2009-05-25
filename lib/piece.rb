@@ -26,6 +26,13 @@ module Game
         self
       end
 
+      # moves the piece according to the rules
+      # to be implemented by the implementing classes
+      # x, y:: new position
+      def move x, y
+        raise "It's not #{self.type}'s turn to play !" unless self.type == @board.turn
+      end
+
       # takes the piece out of the board as a prisonner
       def kill
         fromx, fromy = [@x, @y]

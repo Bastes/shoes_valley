@@ -34,12 +34,14 @@ module Game
 
       # If the move is not legit, an exception is raised.
       def move x, y
+        super
 =begin
     raise ArgumentError.new "Already on #{x}, #{y}." if [@x, @y] == [x, y]
     unless @x = 0 or @y = 0 or [-1, 1].include? (@x - x) / (@y - y)
       raise ArgumentError.new "Only move on rows, columns or diagonals."
     end
 =end
+        @board.turn = :troll
         put x, y # FIXME
       end
 
