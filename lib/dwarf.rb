@@ -41,8 +41,8 @@ module Game
       raise ArgumentError.new "Only move on rows, columns or diagonals."
     end
 =end
-        @board.turn = :troll
         put x, y # FIXME
+        @board.turn = :troll
       end
 
       def self.type # :nodoc:

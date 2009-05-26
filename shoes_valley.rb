@@ -64,7 +64,11 @@ module BoardView
       @selection = nil
       this_piece_image = find_piece_image(piece)
       this_piece_image.displace(0, 0)
-      piece.move(x, y)
+      begin
+        piece.move(x, y)
+      rescue
+        alert "#{$!}"
+      end
     end
   end
 
