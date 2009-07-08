@@ -1,6 +1,10 @@
 $LOAD_PATH << './lib'
+RESOURCES_PATH = 'resources/'
 
 require 'board'
+
+module BoardControls
+end
 
 module BoardView
   attr_reader :width, :height, :board
@@ -26,19 +30,16 @@ module BoardView
 
   def redraw all = false
     if all or @pieces.nil?
-      self.clear do
-        self.image "./board.png", :top => 0, :left => 0,
-                   :width => board_size, :height => board_size
+      clear do
+        image "#{RESOURCES_PATH}board.png", :top => 0, :left => 0,
+              :width => board_size, :height => board_size
 
         fill rgb(0, 0, 0, 0)
         15.times do |y|
           15.times do |x|
             if @board.cell? x, y
-              zone = rect((cell_gap * x).to_i, (cell_gap * y).to_i,
-                          cell_size, cell_size)
-              zone.click do
-                self.clicked x, y
-              end
+              rect((gap * x).to_i, (gap * y).to_i, cell_size, cell_size)\
+                .click { clicked x, y }
             end
           end
         end
@@ -79,8 +80,8 @@ module BoardView
       if fromx.nil?
         piece_image piece
       else
-        x = (cell_gap * piece.x).to_i
-        y = (cell_gap * piece.y).to_i
+        x = (gap * piece.x).to_i
+        y = (gap * piece.y).to_i
         find_piece_image(fromx, fromy).move(x, y)
       end
     end
@@ -94,19 +95,19 @@ module BoardView
     else
       type, x, y = args
     end
-    image "./#{type}.png",
-          :top => (y * cell_gap).to_i,
-          :left => (x * cell_gap).to_i,
+    image "#{RESOURCES_PATH}#{type}.png",
+          :top => (y * gap).to_i,
+          :left => (x * gap).to_i,
           :width => cell_size, :height => cell_size
   end
 
   def find_piece_image *args
     if args.length == 1
-      x = (cell_gap * args.first.x).to_i
-      y = (cell_gap * args.first.y).to_i
+      x = (gap * args.first.x).to_i
+      y = (gap * args.first.y).to_i
     else
-      x = (cell_gap * args[0]).to_i
-      y = (cell_gap * args[1]).to_i
+      x = (gap * args[0]).to_i
+      y = (gap * args[1]).to_i
     end
     @pieces.detect do |piece_image|
       piece_image.left == x and piece_image.top == y 
@@ -117,17 +118,17 @@ module BoardView
     @board_size ||= [@width, @height].sort.first
   end
 
-  def cell_gap
-    @cell_gap ||= board_size.to_f / 15
+  def gap
+    @gap ||= board_size.to_f / 15
   end
 
   def cell_size
-    @cell_size ||= cell_gap.to_i
+    @cell_size ||= gap.to_i
   end
 
   def clear_sizes!
     @board_size = nil
-    @cell_gap = nil
+    @gap = nil
     @cell_size = nil
   end
 end
