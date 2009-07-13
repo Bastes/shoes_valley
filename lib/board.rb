@@ -43,7 +43,7 @@ module Game
 
       # See default setup on general class comments.
       def initialize
-        @listeners = []
+        @callbacks = []
         @pieces = []
         @turn = :dwarf
 
@@ -120,19 +120,10 @@ module Game
         (0..7).include? xr and (0..7).include? yr and xr + yr > 4
       end
 
-      # Add a board listener.
-      # listener:: board listener to add
-      def listen listener
-        unless listener.respond_to? :board_event
-          raise ArgumentError.new "#{listener} is not a board listener."
-        end
-        @listeners << listener unless @listeners.include? listener
-      end
-
-      # Remove a board listener.
-      # listener:: board listener to remove
-      def deafen listener
-        @listeners.delete listener
+      # Add a board event callback.
+      # callback:: board event callback to add
+      def listen &callback
+        @callbacks << callback
       end
 
       # Triggered by pieces when they move.
@@ -140,8 +131,8 @@ module Game
       # piece:: an event is happening to a piece
       # x, y:: former position of the piece
       def piece_event piece, fromx = nil, fromy = nil
-        @listeners.each do |listener|
-          listener.board_event piece, fromx, fromy
+        @callbacks.each do |callback|
+          callback.call piece, fromx, fromy
         end
       end
     end

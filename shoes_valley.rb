@@ -11,7 +11,7 @@ module BoardView
 
   def board= value
     @board = value
-    @board.listen self
+    @board.listen { |p, x, y| self.board_event p, x, y }
   end
 
   def width= value
